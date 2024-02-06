@@ -15,8 +15,7 @@ def main():
     # On compte le nombre de mots
     df_out = wordcount(df, "text")
     # On écrit le résultat dans un fichier parquet
-    df_out.write.mode("overwrite").partitionBy("count").parquet(f"{path}/src/fr/hymaia/exo1/output")
-    df_out.show()
+    df_out.write.mode("overwrite").partitionBy("count").parquet(f"{path}/data/exo1/output")
 
 
 def wordcount(df, col_name):

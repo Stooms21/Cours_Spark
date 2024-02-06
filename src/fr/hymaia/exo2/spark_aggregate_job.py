@@ -18,14 +18,14 @@ def main():
         .getOrCreate()
 
     path = os.getcwd()
-    path_clean = f"{path}/src/fr/hymaia/exo2/clean"
+    path_clean = f"{path}/data/exo2/clean"
 
     # On lit le fichier parquet
     df_zip_code = (spark.read.parquet(f"{path_clean}"))
 
     # On agrège les données par département et on les écrit dans un fichier csv
     df_agg = agg_departement(df_zip_code)
-    df_agg.coalesce(1).write.mode("overwrite").csv(f"{path}/src/fr/hymaia/exo2/agg", header=True)
+    df_agg.coalesce(1).write.mode("overwrite").csv(f"{path}/data/exo2/agg", header=True)
 
 
 

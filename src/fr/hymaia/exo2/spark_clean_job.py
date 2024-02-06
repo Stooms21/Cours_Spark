@@ -1,4 +1,3 @@
-import pyspark.sql.functions as f
 from pyspark.sql import SparkSession
 from pyspark.sql.functions import when, col, substring
 import os
@@ -28,6 +27,16 @@ def ajout_departement(df):
     return df_output
 
 
+def clean(df_clients, df_zip_code):
+    # On applique la jointure ainsi que le filtrage des clients majeurs
+    output = join_zip(df_clients, df_zip_code)
+
+    # On ajoute une colonne département à partir du code postal
+    output_dep = ajout_departement(output)
+
+    return output_dep
+
+
 def main():
     # Initialisation de la session spark
     spark = SparkSession.builder \
@@ -49,10 +58,7 @@ def main():
                   .csv(f"{path_resources}/clients_bdd.csv"))
 
     # On applique la jointure ainsi que le filtrage des clients majeurs
-    output = join_zip(df_clients, df_zip_code)
-
-    # On ajoute une colonne département à partir du code postal
-    output_dep = ajout_departement(output)
+    output_dep = clean(df_clients, df_zip_code)
 
     # On sauvegarde le résultat dans un fichier parquet
     output_dep.write.mode("overwrite").parquet(f"{path_output}")

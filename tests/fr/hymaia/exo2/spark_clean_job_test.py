@@ -1,6 +1,6 @@
 import unittest
 from pyspark.sql import SparkSession
-from src.fr.hymaia.exo2.spark_clean_job import adult_clients, join_zip, ajout_departement
+from src.fr.hymaia.exo2.spark_clean_job import adult_clients, join_zip, ajout_departement, clean
 
 
 class SparkCleanJobTest(unittest.TestCase):
@@ -30,12 +30,14 @@ class SparkCleanJobTest(unittest.TestCase):
         df_zip_code = self.spark.createDataFrame(data_zip_code, ["zip", "city"])
 
         # When
-        result = (join_zip(df_clients, df_zip_code).select("name", "age", "zip", "city")
+        result = (join_zip(df_clients, df_zip_code)
+                  .select("name", "age", "zip", "city")
                   .orderBy("name", "age", "zip", "city"))
 
         expected_data = [("Fiodor", 18, "25540", "Saint-Petersbourg")]
-        expected_df = (self.spark.createDataFrame(expected_data, ["name", "age", "zip", "city"])
-                       .select("name", "age", "zip", "city")).orderBy("name", "age", "zip", "city")
+        expected_df = ((self.spark.createDataFrame(expected_data, ["name", "age", "zip", "city"])
+                       .select("name", "age", "zip", "city"))
+                       .orderBy("name", "age", "zip", "city"))
 
         # Then
         self.assertEqual(result.collect(), expected_df.collect())
@@ -53,6 +55,26 @@ class SparkCleanJobTest(unittest.TestCase):
 
         # Then
         self.assertEqual(result.collect(), expected_df.collect())
+
+    def test_integration(self):
+        # Given
+        data_clients = [("Laurent", 17, "92130"), ("Fiodor", 18, "25540"), ("Daniel", 19, "17300")]
+        df_clients = self.spark.createDataFrame(data_clients, ["name", "age", "zip"])
+
+        data_zip = [("92130", "Issy-les-Moulineaux"), ("25540", "Saint-Petersbourg"), ("17300", "Rennes")]
+        df_zip = self.spark.createDataFrame(data_zip, ["zip", "city"])
+
+        # When
+        df_add_departement = (clean(df_clients, df_zip)
+                              .select("name", "age", "zip", "city", "departement")
+                              .orderBy("name", "age", "zip", "city", "departement"))
+
+        # Then
+        expected_data = [("Fiodor", 18, "25540", "Saint-Petersbourg", "25"), ("Daniel", 19, "17300", "Rennes", "17")]
+        expected_df = (self.spark.createDataFrame(expected_data, ["name", "age", "zip", "city", "departement"])
+                       .orderBy("name", "age", "zip", "city", "departement"))
+
+        self.assertEqual(df_add_departement.collect(), expected_df.collect())
 
 
 if __name__ == "__main__":

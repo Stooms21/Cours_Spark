@@ -1,6 +1,7 @@
 import unittest
 from pyspark.sql import SparkSession
 from src.fr.hymaia.exo2.spark_aggregate_job import agg_departement
+from pyspark.sql.types import StructType, StructField, StringType
 
 
 class SparkAggregateJobTest(unittest.TestCase):
@@ -22,6 +23,19 @@ class SparkAggregateJobTest(unittest.TestCase):
 
         # Then
         self.assertEqual(result.collect(), expected_df.collect())
+
+    def test_agg_departement_dataframe_vide(self):
+        # Given
+        data = []
+        schema = StructType([
+            StructField("name", StringType(), True),
+            StructField("departement", StringType(), True)
+        ])
+        df = self.spark.createDataFrame(data, schema)
+
+        # When
+        with self.assertRaises(Exception):
+            agg_departement(df)
 
 
 if __name__ == "__main__":

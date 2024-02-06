@@ -2,6 +2,7 @@ import unittest
 from pyspark.sql import SparkSession
 from src.fr.hymaia.exo2.spark_clean_job import adult_clients, join_zip, ajout_departement
 
+
 class SparkCleanJobTest(unittest.TestCase):
 
     spark = SparkSession.builder.appName('unittest').getOrCreate()

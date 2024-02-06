@@ -5,13 +5,16 @@ import os
 
 from pyspark.sql.types import StringType
 
+
 # Fonction qui filtre les clients majeurs
 def adult_clients(df):
     return df.filter(col('age') >= 18)
 
+
 # Fonction qui joint les deux dataframes : celle des clients et celle des codes postaux
 def join_zip(df_clients, df_zip_code):
     return adult_clients(df_clients).join(df_zip_code, 'zip')
+
 
 # Fonction qui ajoute une colonne département à partir du code postal des clients et prend en compte le cas de la Corse
 def ajout_departement(df):

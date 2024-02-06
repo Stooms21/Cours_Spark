@@ -18,10 +18,13 @@ def join_zip(df_clients, df_zip_code):
 
 # Fonction qui ajoute une colonne département à partir du code postal des clients et prend en compte le cas de la Corse
 def ajout_departement(df):
+    not_corse = substring(col('zip').cast(StringType()), 0, 2) != '20'
+    write_not_corse = substring(col('zip').cast(StringType()), 0, 2)
+    is_corse_2A = col('zip').cast(StringType()) <= '20190'
+
     df_output = (df.withColumn('departement',
-                               when(substring(col('zip').cast(StringType()), 0, 2) != '20',
-                                    substring(col('zip').cast(StringType()), 0, 2))
-                               .otherwise(when(col('zip').cast(StringType()) <= '20190', '2A').otherwise('2B'))))
+                               when(not_corse, write_not_corse)
+                               .otherwise(when(is_corse_2A, '2A').otherwise('2B'))))
     return df_output
 
 
@@ -34,18 +37,22 @@ def main():
 
     path = os.getcwd()
     path_resources = f"{path}/src/resources/exo2"
-    path_output = f"{path}/src/fr/hymaia/exo2/clean"
+    path_output = f"{path}/data/exo2/clean"
 
     # Chargement des données à partir des fichiers csv dans des dataframes spark
-    df_zip_code = (spark.read.option("header", "true").option("delimiter", ",")
+    df_zip_code = (spark.read.option("header", "true")
+                   .option("delimiter", ",")
                    .csv(f"{path_resources}/city_zipcode.csv"))
 
-    df_clients = (spark.read.option("header", "true").option("delimiter", ",")
+    df_clients = (spark.read.option("header", "true")
+                  .option("delimiter", ",")
                   .csv(f"{path_resources}/clients_bdd.csv"))
 
     # On applique la jointure ainsi que le filtrage des clients majeurs
     output = join_zip(df_clients, df_zip_code)
+
     # On ajoute une colonne département à partir du code postal
     output_dep = ajout_departement(output)
+
     # On sauvegarde le résultat dans un fichier parquet
     output_dep.write.mode("overwrite").parquet(f"{path_output}")

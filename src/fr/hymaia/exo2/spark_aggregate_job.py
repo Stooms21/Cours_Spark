@@ -1,4 +1,3 @@
-import pyspark.sql.functions as f
 from pyspark.sql import SparkSession
 from pyspark.sql.functions import col
 import os
@@ -7,7 +6,9 @@ import os
 def agg_departement(df):
     # Nous souhaiterions savoir combien de nos clients vivent par département et trier le résultat du département
     # le plus peuplé au moins peuplé. En cas d'égalité, c'est l'ordre alphabétique qui nous intéressera.
-    return df.groupBy(col('departement')).count().sort(col('count').desc(), col('departement'))
+    return (df.groupBy(col('departement'))
+            .count()
+            .sort(col('count').desc(), col('departement')))
 
 
 def main():
@@ -25,7 +26,6 @@ def main():
 
     # On agrège les données par département et on les écrit dans un fichier csv
     df_agg = agg_departement(df_zip_code)
-    df_agg.coalesce(1).write.mode("overwrite").csv(f"{path}/data/exo2/agg", header=True)
-
-
-
+    (df_agg.coalesce(1).write
+     .mode("overwrite")
+     .csv(f"{path}/data/exo2/agg", header=True))

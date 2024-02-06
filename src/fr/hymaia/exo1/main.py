@@ -9,11 +9,15 @@ def main():
         .appName("wordcount") \
         .master("local[*]") \
         .getOrCreate()
+
     path = os.getcwd()
+
     # On lit le fichier csv
     df = spark.read.option("header", "true").csv(f"{path}/src/resources/exo1/data.csv")
+
     # On compte le nombre de mots
     df_out = wordcount(df, "text")
+
     # On écrit le résultat dans un fichier parquet
     df_out.write.mode("overwrite").partitionBy("count").parquet(f"{path}/data/exo1/output")
 

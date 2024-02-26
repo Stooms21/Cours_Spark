@@ -16,7 +16,7 @@ class SparkCleanJobTest(unittest.TestCase):
         result = adult_clients(df)
 
         expected_data = [("Fiodor", 18, "25540"), ("Daniel", 19, "17300")]
-        expected_df = self.spark.createDataFrame(expected_data, ["name", "age", 'zip'])
+        expected_df = self.spark.createDataFrame(expected_data, ["naame", "age", 'zip'])
 
         # Then
         self.assertEqual(result.collect(), expected_df.collect())

@@ -5,11 +5,14 @@ import os
 
 
 # On crée une udf pour ajouter la colonne category_name
+@f.udf('string')
 def category_name(category):
     if int(category) < 6:
         return "food"
     else:
         return "furniture"
+def add_category_name(df):
+    return df.withColumn('category_name', category_name(df.category))
 
 
 def main():
@@ -23,7 +26,8 @@ def main():
     path_sell = f"{path}/src/resources/exo4/sell.csv"
 
     df_sell = (spark.read.csv(f"{path_sell}", header=True))
+    df_result = add_category_name(df_sell)
 
-    category_name_udf = f.udf(category_name, StringType())
+    #category_name_udf = f.udf(category_name, StringType())
 
-    df_sell.withColumn('category_name', category_name_udf(df_sell.category)).show(4)
+    #df_sell.withColumn('category_name', category_name_udf(df_sell.category)).show(4)

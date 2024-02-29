@@ -3,22 +3,24 @@ import pyspark.sql.functions as f
 from pyspark.sql.window import Window
 import os
 
-
+spark = SparkSession.builder.appName("exo4").master("local[*]").getOrCreate()
 def main():
-    # On lance une session spark en local avec autant de coeurs que possible pour bien tester le parallelisme
-    spark = SparkSession.builder \
-        .appName("no_udf") \
-        .master("local[*]") \
-        .getOrCreate()
 
-    path = os.getcwd()
-    path_sell = f"{path}/src/resources/exo4/sell.csv"
+    # read csv file
+    df = spark.read.option("header", "true").csv("src/resources/exo4/sell.csv")
+    df_cat = add_category_name_no_udf(df)
 
-    df_sell = (spark.read.csv(f"{path_sell}", header=True))
+def add_category_name_no_udf(df):
+    return df.withColumn('category_name',f.when(df.category < 6, 'food').otherwise('furniture'))
 
-    df_sell = df_sell.withColumn('category_name', f.when(f.col('category') < 6, 'food').otherwise('furniture'))
+def add_total_price_per_category_per_day(df, category_name, date, price):
+    window = Window.partitionBy(date, category_name)
+    sum_price = f.sum(price).over(window)
+    return df.withColumn('total_price_per_category_per_day', sum_price)
 
-    windowSpec = Window.partitionBy("category", "date")
-    df_sell = df_sell.withColumn('total_price_per_category_per_day', f.sum('price').over(windowSpec))
+def add_total_price_per_category_per_day_last_30_days(df, category_name, date, price):
+    window = Window.partitionBy(category_name).orderBy(date).rowsBetween(-30, 0)
+    sum_price = f.sum(price).over(window)
 
-    df_sell.show(10)
+    # Ajout de la colonne 'total_price_per_category_per_day_last_30_days'
+    return df.withColumn('total_price_per_category_per_day_last_30_days', sum_price)

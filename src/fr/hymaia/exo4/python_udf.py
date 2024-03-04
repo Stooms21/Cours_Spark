@@ -2,10 +2,11 @@ from pyspark.sql import SparkSession
 import pyspark.sql.functions as f
 from pyspark.sql.types import StringType
 import os
+import time
 
 
 # On crée une udf pour ajouter la colonne category_name
-@f.udf('string')
+@f.udf(StringType())
 def category_name(category):
     if int(category) < 6:
         return "food"
@@ -25,9 +26,9 @@ def main():
     path = os.getcwd()
     path_sell = f"{path}/src/resources/exo4/sell.csv"
 
+
     df_sell = (spark.read.csv(f"{path_sell}", header=True))
     df_result = add_category_name(df_sell)
+    distinct_count = df_result.groupby("category_name").count().show()
 
-    #category_name_udf = f.udf(category_name, StringType())
 
-    #df_sell.withColumn('category_name', category_name_udf(df_sell.category)).show(4)

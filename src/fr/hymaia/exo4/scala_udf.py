@@ -30,5 +30,5 @@ def main():
 
 
     df_cat = add_category_name_scala_udf(df_sell)
-    distinct_count = df_cat.groupby("category_name").count().collect()
+    distinct_count = df_cat.groupby("category_name").count().show()
 

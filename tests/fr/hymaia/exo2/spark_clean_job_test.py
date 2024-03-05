@@ -21,7 +21,7 @@ class SparkCleanJobTest(unittest.TestCase):
 
         # Then
         self.assertEqual(result.columns, expected_df.columns)
-        self.assertEqual(result.collect(), expected_df.collect())
+        self.assertCountEqual(result.collect(), expected_df.collect())
 
     def test_join_zip(self):
         # GIven
@@ -58,7 +58,7 @@ class SparkCleanJobTest(unittest.TestCase):
 
         # Then
         self.assertEqual(result.columns, expected_df.columns)
-        self.assertEqual(result.collect(), expected_df.collect())
+        self.assertCountEqual(result.collect(), expected_df.collect())
 
     def test_integration(self):
         # Given

@@ -12,7 +12,8 @@ def main():
     df = spark.read.option("header", "true").csv("src/resources/exo4/sell.csv")
 
     df_cat = add_category_name_no_udf(df)
-    distinct_count = df_cat.groupby("category_name").count().collect()
+    distinct_count = df_cat.groupby("category_name").count().show()
+
 
 
 def add_category_name_no_udf(df):
